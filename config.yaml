@@ -43,4 +43,15 @@ cache:
     host: localhost
     port: 6379
     password:
+
+module:
+  news:
+    scheduler:
+      getNewsRSSEnable: false
+      getNewsRSSDuration: 180 # in seconds
+      getNewsIndexEnable: true
+      getNewsIndexDuration: 10 # in seconds
+    service:
+      urlNewsRSS: https://jambi.antaranews.com/rss/terkini.xml
+      urlNewsIndex: https://www.bisnis.com/index
     

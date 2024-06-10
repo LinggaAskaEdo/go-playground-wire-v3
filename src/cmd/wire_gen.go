@@ -12,24 +12,44 @@ import (
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/database"
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/http"
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/http/router"
+	"github.com/linggaaskaedo/go-playground-wire-v3/lib/scheduler"
+	"github.com/linggaaskaedo/go-playground-wire-v3/lib/scheduler/task"
 	"github.com/linggaaskaedo/go-playground-wire-v3/src/handler/rest"
+	scheduler2 "github.com/linggaaskaedo/go-playground-wire-v3/src/handler/scheduler"
 	"github.com/linggaaskaedo/go-playground-wire-v3/src/module/news/repository"
 	"github.com/linggaaskaedo/go-playground-wire-v3/src/module/news/service"
+	repository2 "github.com/linggaaskaedo/go-playground-wire-v3/src/module/product/repository"
+	service2 "github.com/linggaaskaedo/go-playground-wire-v3/src/module/product/service"
 )
 
 // Injectors from wire.go:
 
-func InitHttpProtocol() *http.HttpImpl {
+func InitServer() *http.HttpImpl {
 	scribleImpl := database.NewScribleClient()
 	jwtTokenImpl := auth.NewJwt(scribleImpl)
 	mysqlImpl := database.NewMysqlClient()
 	postgresImpl := database.NewPostgresClient()
 	newsRepositoryImpl := repository.NewNewsRepository(mysqlImpl, postgresImpl)
 	newsServiceImpl := service.NewNewsService(jwtTokenImpl, newsRepositoryImpl)
-	restHandlerImpl := rest.NewRestHandler(newsServiceImpl)
+	productRepositoryImpl := repository2.NewProductRepository(mysqlImpl, postgresImpl)
+	productServiceImpl := service2.NewProductService(jwtTokenImpl, productRepositoryImpl)
+	restHandlerImpl := rest.NewRestHandler(newsServiceImpl, productServiceImpl)
 	httpRouterImpl := router.NewHttpRouter(restHandlerImpl)
 	httpImpl := http.NewHttpProtocol(httpRouterImpl)
 	return httpImpl
+}
+
+func InitScheduler() *scheduler.SchedulerImpl {
+	scribleImpl := database.NewScribleClient()
+	jwtTokenImpl := auth.NewJwt(scribleImpl)
+	mysqlImpl := database.NewMysqlClient()
+	postgresImpl := database.NewPostgresClient()
+	newsRepositoryImpl := repository.NewNewsRepository(mysqlImpl, postgresImpl)
+	newsServiceImpl := service.NewNewsService(jwtTokenImpl, newsRepositoryImpl)
+	schedulerHandlerImpl := scheduler2.NewSchedulerHandler(newsServiceImpl)
+	schedulerTaskImpl := task.NewSchedulerTask(schedulerHandlerImpl)
+	schedulerImpl := scheduler.NewScheduler(schedulerTaskImpl)
+	return schedulerImpl
 }
 
 // wire.go:
@@ -55,8 +75,25 @@ var newsSvc = wire.NewSet(service.NewNewsService, wire.Bind(
 ),
 )
 
+// product
+var productRepo = wire.NewSet(repository2.NewProductRepository, wire.Bind(
+	new(repository2.ProductRepository),
+	new(*repository2.ProductRepositoryImpl),
+),
+)
+
+var productSvc = wire.NewSet(service2.NewProductService, wire.Bind(
+	new(service2.ProductService),
+	new(*service2.ProductServiceImpl),
+),
+)
+
 // Wiring for http protocol
 var restHandler = wire.NewSet(rest.NewRestHandler)
+
+var schedulerHandler = wire.NewSet(scheduler2.NewSchedulerHandler)
+
+var schedulerTask = wire.NewSet(task.NewSchedulerTask)
 
 // Wiring protocol routing
 var httpRouter = wire.NewSet(router.NewHttpRouter)

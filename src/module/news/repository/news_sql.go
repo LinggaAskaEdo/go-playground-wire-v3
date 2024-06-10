@@ -8,6 +8,26 @@ import (
 	"github.com/linggaaskaedo/go-playground-wire-v3/src/module/news/entity"
 )
 
+func (n *NewsRepositoryImpl) getSQLNewsByURL(ctx context.Context, tx *sql.Tx, url string) (*sql.Tx, bool, error) {
+	var isExist bool
+
+	err := tx.QueryRowContext(ctx, GetNewsByUrl, url).Scan(&isExist)
+	if err != nil {
+		return tx, isExist, errors.FindErrorType(err)
+	}
+
+	return tx, isExist, nil
+}
+
+func (n *NewsRepositoryImpl) createSQLNews(ctx context.Context, tx *sql.Tx, v entity.News) (*sql.Tx, entity.News, error) {
+	_, err := tx.ExecContext(ctx, CreateNews, v.Title, v.URL, v.Content, v.Summary, v.ArticleTS, v.PublishedDate, v.Inserted, v.Updated)
+	if err != nil {
+		return tx, v, errors.FindErrorType(err)
+	}
+
+	return tx, v, nil
+}
+
 func (n *NewsRepositoryImpl) getSQLNewsByID(ctx context.Context, tx *sql.Tx, newsID int64) (*sql.Tx, entity.News, error) {
 	result := entity.News{}
 

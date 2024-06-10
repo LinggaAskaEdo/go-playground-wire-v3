@@ -9,6 +9,8 @@ import (
 )
 
 type NewsService interface {
+	GetLatestNewsRSS(ctx context.Context) error
+	GetLatestNewsIndex(ctx context.Context) error
 	FindNewsByID(ctx context.Context, newsID int64) (dto.NewsRespBody, error)
 }
 

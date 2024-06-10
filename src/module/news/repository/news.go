@@ -8,6 +8,8 @@ import (
 )
 
 type NewsRepository interface {
+	GetNewsByUrl(ctx context.Context, url string) (bool, error)
+	CreateNews(ctx context.Context, v entity.News) (entity.News, error)
 	FindNewsByID(ctx context.Context, newsID int64) (entity.News, error)
 }
 

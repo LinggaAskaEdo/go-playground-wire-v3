@@ -70,6 +70,21 @@ type Config struct {
 			Password string `mapstructure:"password"`
 		} `mapstructure:"redis"`
 	} `mapstructure:"cache"`
+
+	Module struct {
+		News struct {
+			Scheduler struct {
+				GetNewsRSSEnable     bool `mapstructure:"getNewsRSSEnable"`
+				GetNewsRSSDuration   int  `mapstructure:"getNewsRSSDuration"`
+				GetNewsIndexEnable   bool `mapstructure:"getNewsIndexEnable"`
+				GetNewsIndexDuration int  `mapstructure:"getNewsIndexDuration"`
+			} `mapstructure:"scheduler"`
+			Service struct {
+				UrlNewsRSS   string `mapstructure:"urlNewsRSS"`
+				UrlNewsIndex string `mapstructure:"urlNewsIndex"`
+			} `mapstructure:"service"`
+		} `mapstructure:"news"`
+	} `mapstructure:"module"`
 }
 
 func Get() Config {
