@@ -2,10 +2,10 @@ application:
   port: 6666
   log: 
     path: /home/lingga/Downloads/log/app.log
-    maxSize: 1
-    maxBackup: 10 # MB
-    maxAge: 30 # Days
-    compress: true # Disabled by default
+    maxSize: 1 # megabytes
+    maxBackup: 10
+    maxAge: 30 # days
+    compress: true # disabled by default
   key:
     default: tgcEOnliPuyvSAlOyC84SZu0yeZrfXW8
     rsa:
@@ -47,10 +47,10 @@ cache:
 module:
   news:
     scheduler:
-      getNewsRSSEnable: false
-      getNewsRSSDuration: 180 # in seconds
+      getNewsRSSEnable: true
+      getNewsRSSDuration: 15 # minutes
       getNewsIndexEnable: true
-      getNewsIndexDuration: 10 # in seconds
+      getNewsIndexDuration: 3 # minutes
     service:
       urlNewsRSS: https://jambi.antaranews.com/rss/terkini.xml
       urlNewsIndex: https://www.bisnis.com/index

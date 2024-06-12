@@ -20,6 +20,8 @@ type HttpImpl struct {
 func NewHttpProtocol(
 	HttpRouter *router.HttpRouterImpl,
 ) *HttpImpl {
+	log.Info().Msg("Initialize server...")
+
 	return &HttpImpl{
 		HttpRouter: HttpRouter,
 	}

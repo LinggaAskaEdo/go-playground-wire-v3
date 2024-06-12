@@ -29,7 +29,7 @@ func (s *SchedulerHandlerImpl) Scheduler(t gocron.Scheduler) {
 	if config.Get().Module.News.Scheduler.GetNewsRSSEnable {
 		_, err := t.NewJob(
 			gocron.DurationJob(
-				time.Duration(config.Get().Module.News.Scheduler.GetNewsRSSDuration)*time.Second,
+				time.Duration(config.Get().Module.News.Scheduler.GetNewsRSSDuration)*time.Minute,
 			),
 			gocron.NewTask(
 				func(ctx context.Context) {
@@ -46,7 +46,7 @@ func (s *SchedulerHandlerImpl) Scheduler(t gocron.Scheduler) {
 	if config.Get().Module.News.Scheduler.GetNewsIndexEnable {
 		_, err := t.NewJob(
 			gocron.DurationJob(
-				time.Duration(config.Get().Module.News.Scheduler.GetNewsIndexDuration)*time.Second,
+				time.Duration(config.Get().Module.News.Scheduler.GetNewsIndexDuration)*time.Minute,
 			),
 			gocron.NewTask(
 				func(ctx context.Context) {

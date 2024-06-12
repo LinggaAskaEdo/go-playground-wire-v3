@@ -20,12 +20,6 @@ import (
 	productsvc "github.com/linggaaskaedo/go-playground-wire-v3/src/module/product/service"
 )
 
-// var dbConn = wire.NewSet(
-// 	database.NewMysqlClient,
-// 	database.NewPostgresClient,
-// 	database.NewScribleClient,
-// )
-
 // wiring jwt auth
 var jwtAuth = wire.NewSet(
 	jwtauth.NewJwt,
@@ -88,11 +82,32 @@ var httpRouter = wire.NewSet(
 	router.NewHttpRouter,
 )
 
-func InitServer() *http.HttpImpl {
+func InitMySQL() *database.MysqlImpl {
 	wire.Build(
 		database.NewMysqlClient,
+	)
+
+	return nil
+}
+
+func InitPostgres() *database.PostgresImpl {
+	wire.Build(
 		database.NewPostgresClient,
+	)
+
+	return nil
+}
+
+func InitScribble() *database.ScribleImpl {
+	wire.Build(
 		database.NewScribleClient,
+	)
+
+	return nil
+}
+
+func InitServer(a *database.MysqlImpl, b *database.PostgresImpl, c *database.ScribleImpl) *http.HttpImpl {
+	wire.Build(
 		newsRepo,
 		productRepo,
 		jwtAuth,
@@ -106,11 +121,8 @@ func InitServer() *http.HttpImpl {
 	return nil
 }
 
-func InitScheduler() *scheduler.SchedulerImpl {
+func InitScheduler(a *database.MysqlImpl, b *database.PostgresImpl, c *database.ScribleImpl) *scheduler.SchedulerImpl {
 	wire.Build(
-		database.NewMysqlClient,
-		database.NewPostgresClient,
-		database.NewScribleClient,
 		newsRepo,
 		jwtAuth,
 		newsSvc,

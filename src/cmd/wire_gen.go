@@ -24,14 +24,26 @@ import (
 
 // Injectors from wire.go:
 
-func InitServer() *http.HttpImpl {
-	scribleImpl := database.NewScribleClient()
-	jwtTokenImpl := auth.NewJwt(scribleImpl)
+func InitMySQL() *database.MysqlImpl {
 	mysqlImpl := database.NewMysqlClient()
+	return mysqlImpl
+}
+
+func InitPostgres() *database.PostgresImpl {
 	postgresImpl := database.NewPostgresClient()
-	newsRepositoryImpl := repository.NewNewsRepository(mysqlImpl, postgresImpl)
+	return postgresImpl
+}
+
+func InitScribble() *database.ScribleImpl {
+	scribleImpl := database.NewScribleClient()
+	return scribleImpl
+}
+
+func InitServer(a *database.MysqlImpl, b *database.PostgresImpl, c *database.ScribleImpl) *http.HttpImpl {
+	jwtTokenImpl := auth.NewJwt(c)
+	newsRepositoryImpl := repository.NewNewsRepository(a, b)
 	newsServiceImpl := service.NewNewsService(jwtTokenImpl, newsRepositoryImpl)
-	productRepositoryImpl := repository2.NewProductRepository(mysqlImpl, postgresImpl)
+	productRepositoryImpl := repository2.NewProductRepository(a, b)
 	productServiceImpl := service2.NewProductService(jwtTokenImpl, productRepositoryImpl)
 	restHandlerImpl := rest.NewRestHandler(newsServiceImpl, productServiceImpl)
 	httpRouterImpl := router.NewHttpRouter(restHandlerImpl)
@@ -39,12 +51,9 @@ func InitServer() *http.HttpImpl {
 	return httpImpl
 }
 
-func InitScheduler() *scheduler.SchedulerImpl {
-	scribleImpl := database.NewScribleClient()
-	jwtTokenImpl := auth.NewJwt(scribleImpl)
-	mysqlImpl := database.NewMysqlClient()
-	postgresImpl := database.NewPostgresClient()
-	newsRepositoryImpl := repository.NewNewsRepository(mysqlImpl, postgresImpl)
+func InitScheduler(a *database.MysqlImpl, b *database.PostgresImpl, c *database.ScribleImpl) *scheduler.SchedulerImpl {
+	jwtTokenImpl := auth.NewJwt(c)
+	newsRepositoryImpl := repository.NewNewsRepository(a, b)
 	newsServiceImpl := service.NewNewsService(jwtTokenImpl, newsRepositoryImpl)
 	schedulerHandlerImpl := scheduler2.NewSchedulerHandler(newsServiceImpl)
 	schedulerTaskImpl := task.NewSchedulerTask(schedulerHandlerImpl)

@@ -11,8 +11,11 @@ import (
 func main() {
 	logger.InitLogger()
 
-	initScheduler := InitScheduler()
-	initServer := InitServer()
+	initMySQL := InitMySQL()
+	initPostgres := InitPostgres()
+	initScribble := InitScribble()
+	initScheduler := InitScheduler(initMySQL, initPostgres, initScribble)
+	initServer := InitServer(initMySQL, initPostgres, initScribble)
 
 	graceful.GracefulShutdown(
 		context.TODO(),
