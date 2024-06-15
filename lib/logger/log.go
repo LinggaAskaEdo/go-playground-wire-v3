@@ -25,7 +25,21 @@ func InitLogger() {
 	multiWriter := io.MultiWriter(os.Stdout, lumberjackLogger)
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
 	output := zerolog.ConsoleWriter{Out: multiWriter, TimeFormat: time.RFC3339}
+	// output := zerolog.ConsoleWriter{Out: multiWriter}
+	// output.FormatLevel = func(i interface{}) string {
+	// 	return strings.ToUpper(fmt.Sprintf("| %-6s|", i))
+	// }
+	// output.FormatMessage = func(i interface{}) string {
+	// 	return fmt.Sprintf("***%s****", i)
+	// }
+	// output.FormatFieldName = func(i interface{}) string {
+	// 	return fmt.Sprintf("%s:", i)
+	// }
+	// output.FormatFieldValue = func(i interface{}) string {
+	// 	return strings.ToUpper(fmt.Sprintf("%s", i))
+	// }
 
 	log.Logger = log.Output(output)
 	log.Trace().Msg("Zerolog initialized...")

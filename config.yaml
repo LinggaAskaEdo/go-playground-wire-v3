@@ -48,7 +48,7 @@ module:
   news:
     scheduler:
       getNewsRSSEnable: true
-      getNewsRSSDuration: 15 # minutes
+      getNewsRSSDuration: 10 # minutes
       getNewsIndexEnable: true
       getNewsIndexDuration: 3 # minutes
     service:

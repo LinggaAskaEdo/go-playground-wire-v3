@@ -26,6 +26,9 @@ services:
       # Replace CLUSTER_ID with a unique base64 UUID using "bin/kafka-storage.sh random-uuid" 
       # See https://docs.confluent.io/kafka/operations-tools/kafka-tools.html#kafka-storage-sh
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    volumes:
+      - confluentinc-kafka-secrets-volume:/etc/kafka/secrets
+      - confluentinc-kafka-data-volume:/var/lib/kafka/data
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.6.1
@@ -39,6 +42,8 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    volumes:
+      - confluentinc-schema-registry-secrets-volume:/etc/schema-registry/secrets
 
   connect:
     image: cnfldemos/cp-server-connect-datagen:0.6.4-7.6.0
@@ -69,6 +74,11 @@ services:
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
+    volumes:
+      - cnfldemos-datagen-kafka-secrets-volume:/etc/kafka/secrets
+      - cnfldemos-datagen-kafka-data-volume:/var/lib/kafka/data
+      - cnfldemos-datagen-kafka-connect-jars-volume:/etc/kafka-connect/jars
+      - cnfldemos-datagen-kafka-connect-secrets-volume:/etc/kafka-connect/secrets
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:7.6.1
@@ -163,3 +173,26 @@ services:
       KAFKA_REST_BOOTSTRAP_SERVERS: 'broker:29092'
       KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+
+volumes:
+  confluentinc-schema-registry-secrets-volume:
+    external: true
+    name: confluentinc-schema-registry-secrets-volume
+  confluentinc-kafka-secrets-volume:
+    external: true
+    name: confluentinc-kafka-secrets-volume
+  confluentinc-kafka-data-volume:
+    external: true
+    name: confluentinc-kafka-data-volume
+  cnfldemos-datagen-kafka-secrets-volume:
+    external: true
+    name: cnfldemos-datagen-kafka-secrets-volume
+  cnfldemos-datagen-kafka-data-volume:
+    external: true
+    name: cnfldemos-datagen-kafka-data-volume
+  cnfldemos-datagen-kafka-connect-jars-volume:
+    external: true
+    name: cnfldemos-datagen-kafka-connect-jars-volume
+  cnfldemos-datagen-kafka-connect-secrets-volume:
+    external: true
+    name: cnfldemos-datagen-kafka-connect-secrets-volume
