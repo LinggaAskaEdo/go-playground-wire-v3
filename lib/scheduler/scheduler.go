@@ -11,7 +11,7 @@ import (
 
 type SchedulerImpl struct {
 	SchedulerTask *task.SchedulerTaskImpl
-	schduler      gocron.Scheduler
+	scheduler      gocron.Scheduler
 }
 
 func NewScheduler(
@@ -40,7 +40,7 @@ func (p *SchedulerImpl) Start() {
 }
 
 func (p *SchedulerImpl) Shutdown(ctx context.Context) error {
-	if err := p.schduler.Shutdown(); err != nil {
+	if err := p.scheduler.Shutdown(); err != nil {
 		return err
 	}
 

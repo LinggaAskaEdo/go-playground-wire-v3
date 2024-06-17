@@ -44,6 +44,13 @@ cache:
     port: 6379
     password:
 
+queue:
+  rabbit:
+    host: localhost
+    user: root
+    password: a5k4CooL
+    port: 5672
+
 module:
   news:
     scheduler:
@@ -54,4 +61,7 @@ module:
     service:
       urlNewsRSS: https://jambi.antaranews.com/rss/terkini.xml
       urlNewsIndex: https://www.bisnis.com/index
+  user:
+    pubsub:
+      userCreatedEnable: true
     

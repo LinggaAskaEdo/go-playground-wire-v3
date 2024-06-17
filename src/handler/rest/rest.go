@@ -23,13 +23,12 @@ func NewRestHandler(
 }
 
 func (h *RestHandlerImpl) Router(r *chi.Mux) {
+	// news
 	r.Get("/api/news/{id}", h.FindNewsByID)
+
+	// product
 	r.Get("/api/product/{id}", h.FindProductByID)
-	// r.Get("/products", h.GetProducts)
-	// r.Get("/products/{productId}", h.GetProductByID)
-	// r.Post("/products", h.CreateNewProduct)
-	// r.Delete("/products/{productId}", h.DeleteProductByID)
-	// r.Get("/users/{userId}", h.GetUserById)
-	// r.Post("/users/login", h.UserLogin)
-	// r.With(middleware.JwtVerifyRefreshToken).Post("/users/refresh", h.UserRefreshToken)
+
+	// user
+	r.Post("/api/user/", h.CreateUser)
 }

@@ -19,12 +19,12 @@ func (h *RestHandlerImpl) FindNewsByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.NewsService.FindNewsByID(r.Context(), int64(newsID))
+	news, err := h.NewsService.FindNewsByID(r.Context(), int64(newsID))
 	if err != nil {
 		log.Err(err)
 		httpresponse.Err(w, err)
 		return
 	}
 
-	httpresponse.Json(w, http.StatusOK, "", user)
+	httpresponse.Json(w, http.StatusOK, "", news)
 }

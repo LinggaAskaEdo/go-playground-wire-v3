@@ -12,14 +12,19 @@ import (
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/database"
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/http"
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/http/router"
+	"github.com/linggaaskaedo/go-playground-wire-v3/lib/rabbit"
+	"github.com/linggaaskaedo/go-playground-wire-v3/lib/rabbit/consumer"
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/scheduler"
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/scheduler/task"
+	rabbit2 "github.com/linggaaskaedo/go-playground-wire-v3/src/handler/pubsub/rabbit"
 	"github.com/linggaaskaedo/go-playground-wire-v3/src/handler/rest"
 	scheduler2 "github.com/linggaaskaedo/go-playground-wire-v3/src/handler/scheduler"
 	"github.com/linggaaskaedo/go-playground-wire-v3/src/module/news/repository"
 	"github.com/linggaaskaedo/go-playground-wire-v3/src/module/news/service"
-	repository2 "github.com/linggaaskaedo/go-playground-wire-v3/src/module/product/repository"
-	service2 "github.com/linggaaskaedo/go-playground-wire-v3/src/module/product/service"
+	repository3 "github.com/linggaaskaedo/go-playground-wire-v3/src/module/product/repository"
+	service3 "github.com/linggaaskaedo/go-playground-wire-v3/src/module/product/service"
+	repository2 "github.com/linggaaskaedo/go-playground-wire-v3/src/module/user/repository"
+	service2 "github.com/linggaaskaedo/go-playground-wire-v3/src/module/user/service"
 )
 
 // Injectors from wire.go:
@@ -39,18 +44,6 @@ func InitScribble() *database.ScribleImpl {
 	return scribleImpl
 }
 
-func InitServer(a *database.MysqlImpl, b *database.PostgresImpl, c *database.ScribleImpl) *http.HttpImpl {
-	jwtTokenImpl := auth.NewJwt(c)
-	newsRepositoryImpl := repository.NewNewsRepository(a, b)
-	newsServiceImpl := service.NewNewsService(jwtTokenImpl, newsRepositoryImpl)
-	productRepositoryImpl := repository2.NewProductRepository(a, b)
-	productServiceImpl := service2.NewProductService(jwtTokenImpl, productRepositoryImpl)
-	restHandlerImpl := rest.NewRestHandler(newsServiceImpl, productServiceImpl)
-	httpRouterImpl := router.NewHttpRouter(restHandlerImpl)
-	httpImpl := http.NewHttpProtocol(httpRouterImpl)
-	return httpImpl
-}
-
 func InitScheduler(a *database.MysqlImpl, b *database.PostgresImpl, c *database.ScribleImpl) *scheduler.SchedulerImpl {
 	jwtTokenImpl := auth.NewJwt(c)
 	newsRepositoryImpl := repository.NewNewsRepository(a, b)
@@ -59,6 +52,28 @@ func InitScheduler(a *database.MysqlImpl, b *database.PostgresImpl, c *database.
 	schedulerTaskImpl := task.NewSchedulerTask(schedulerHandlerImpl)
 	schedulerImpl := scheduler.NewScheduler(schedulerTaskImpl)
 	return schedulerImpl
+}
+
+func InitPubsub(a *database.MysqlImpl, b *database.PostgresImpl, c *database.ScribleImpl) *rabbit.RabbitImpl {
+	jwtTokenImpl := auth.NewJwt(c)
+	userRepositoryImpl := repository2.NewUserRepository(a)
+	userServiceImpl := service2.NewUserService(jwtTokenImpl, userRepositoryImpl)
+	rabbitHandlerImpl := rabbit2.NewRabbitHandler(userServiceImpl)
+	pubsubConsumerImpl := consumer.NewPubsubConsumer(rabbitHandlerImpl)
+	rabbitImpl := rabbit.NewRabbit(pubsubConsumerImpl)
+	return rabbitImpl
+}
+
+func InitServer(a *database.MysqlImpl, b *database.PostgresImpl, c *database.ScribleImpl) *http.HttpImpl {
+	jwtTokenImpl := auth.NewJwt(c)
+	newsRepositoryImpl := repository.NewNewsRepository(a, b)
+	newsServiceImpl := service.NewNewsService(jwtTokenImpl, newsRepositoryImpl)
+	productRepositoryImpl := repository3.NewProductRepository(a, b)
+	productServiceImpl := service3.NewProductService(jwtTokenImpl, productRepositoryImpl)
+	restHandlerImpl := rest.NewRestHandler(newsServiceImpl, productServiceImpl)
+	httpRouterImpl := router.NewHttpRouter(restHandlerImpl)
+	httpImpl := http.NewHttpProtocol(httpRouterImpl)
+	return httpImpl
 }
 
 // wire.go:
@@ -85,15 +100,28 @@ var newsSvc = wire.NewSet(service.NewNewsService, wire.Bind(
 )
 
 // product
-var productRepo = wire.NewSet(repository2.NewProductRepository, wire.Bind(
-	new(repository2.ProductRepository),
-	new(*repository2.ProductRepositoryImpl),
+var productRepo = wire.NewSet(repository3.NewProductRepository, wire.Bind(
+	new(repository3.ProductRepository),
+	new(*repository3.ProductRepositoryImpl),
 ),
 )
 
-var productSvc = wire.NewSet(service2.NewProductService, wire.Bind(
-	new(service2.ProductService),
-	new(*service2.ProductServiceImpl),
+var productSvc = wire.NewSet(service3.NewProductService, wire.Bind(
+	new(service3.ProductService),
+	new(*service3.ProductServiceImpl),
+),
+)
+
+// user
+var userRepo = wire.NewSet(repository2.NewUserRepository, wire.Bind(
+	new(repository2.UserRepository),
+	new(*repository2.UserRepositoryImpl),
+),
+)
+
+var userSvc = wire.NewSet(service2.NewUserService, wire.Bind(
+	new(service2.UserService),
+	new(*service2.UserServiceImpl),
 ),
 )
 
@@ -102,7 +130,11 @@ var restHandler = wire.NewSet(rest.NewRestHandler)
 
 var schedulerHandler = wire.NewSet(scheduler2.NewSchedulerHandler)
 
+var pubsubRabbitHandler = wire.NewSet(rabbit2.NewRabbitHandler)
+
 var schedulerTask = wire.NewSet(task.NewSchedulerTask)
+
+var pubsubConsumer = wire.NewSet(consumer.NewPubsubConsumer)
 
 // Wiring protocol routing
 var httpRouter = wire.NewSet(router.NewHttpRouter)

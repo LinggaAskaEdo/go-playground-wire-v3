@@ -71,6 +71,15 @@ type Config struct {
 		} `mapstructure:"redis"`
 	} `mapstructure:"cache"`
 
+	Queue struct {
+		Rabbit struct {
+			Host     string `mapstructure:"host"`
+			User     string `mapstructure:"user"`
+			Password string `mapstructure:"password"`
+			Port     int    `mapstructure:"port"`
+		} `mapstructure:"rabbit"`
+	} `mapstructure:"queue"`
+
 	Module struct {
 		News struct {
 			Scheduler struct {
@@ -84,6 +93,11 @@ type Config struct {
 				UrlNewsIndex string `mapstructure:"urlNewsIndex"`
 			} `mapstructure:"service"`
 		} `mapstructure:"news"`
+		User struct {
+			Pubsub struct {
+				UserCreatedEnable bool `mapstructure:"userCreatedEnable"`
+			} `mapstructure:"pubsub"`
+		} `mapstructure:"user"`
 	} `mapstructure:"module"`
 }
 

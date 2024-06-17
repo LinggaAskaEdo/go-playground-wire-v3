@@ -5,8 +5,9 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	httpresponse "github.com/linggaaskaedo/go-playground-wire-v3/lib/http/response"
 	"github.com/rs/zerolog/log"
+
+	httpresponse "github.com/linggaaskaedo/go-playground-wire-v3/lib/http/response"
 )
 
 func (h *RestHandlerImpl) FindProductByID(w http.ResponseWriter, r *http.Request) {
@@ -18,12 +19,12 @@ func (h *RestHandlerImpl) FindProductByID(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	user, err := h.ProductService.FindProductByID(r.Context(), int64(productID))
+	product, err := h.ProductService.FindProductByID(r.Context(), int64(productID))
 	if err != nil {
 		log.Err(err)
 		httpresponse.Err(w, err)
 		return
 	}
 
-	httpresponse.Json(w, http.StatusOK, "", user)
+	httpresponse.Json(w, http.StatusOK, "", product)
 }

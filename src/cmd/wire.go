@@ -10,14 +10,19 @@ import (
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/database"
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/http"
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/http/router"
+	"github.com/linggaaskaedo/go-playground-wire-v3/lib/rabbit"
+	"github.com/linggaaskaedo/go-playground-wire-v3/lib/rabbit/consumer"
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/scheduler"
 	"github.com/linggaaskaedo/go-playground-wire-v3/lib/scheduler/task"
+	pubsubrabbithandler "github.com/linggaaskaedo/go-playground-wire-v3/src/handler/pubsub/rabbit"
 	resthandler "github.com/linggaaskaedo/go-playground-wire-v3/src/handler/rest"
 	schedulerhandler "github.com/linggaaskaedo/go-playground-wire-v3/src/handler/scheduler"
 	newsrepo "github.com/linggaaskaedo/go-playground-wire-v3/src/module/news/repository"
 	newssvc "github.com/linggaaskaedo/go-playground-wire-v3/src/module/news/service"
 	productrepo "github.com/linggaaskaedo/go-playground-wire-v3/src/module/product/repository"
 	productsvc "github.com/linggaaskaedo/go-playground-wire-v3/src/module/product/service"
+	userrepo "github.com/linggaaskaedo/go-playground-wire-v3/src/module/user/repository"
+	usersvc "github.com/linggaaskaedo/go-playground-wire-v3/src/module/user/service"
 )
 
 // wiring jwt auth
@@ -64,6 +69,23 @@ var productSvc = wire.NewSet(
 	),
 )
 
+// user
+var userRepo = wire.NewSet(
+	userrepo.NewUserRepository,
+	wire.Bind(
+		new(userrepo.UserRepository),
+		new(*userrepo.UserRepositoryImpl),
+	),
+)
+
+var userSvc = wire.NewSet(
+	usersvc.NewUserService,
+	wire.Bind(
+		new(usersvc.UserService),
+		new(*usersvc.UserServiceImpl),
+	),
+)
+
 // Wiring for http protocol
 var restHandler = wire.NewSet(
 	resthandler.NewRestHandler,
@@ -73,8 +95,16 @@ var schedulerHandler = wire.NewSet(
 	schedulerhandler.NewSchedulerHandler,
 )
 
+var pubsubRabbitHandler = wire.NewSet(
+	pubsubrabbithandler.NewRabbitHandler,
+)
+
 var schedulerTask = wire.NewSet(
 	task.NewSchedulerTask,
+)
+
+var pubsubConsumer = wire.NewSet(
+	consumer.NewPubsubConsumer,
 )
 
 // Wiring protocol routing
@@ -106,6 +136,32 @@ func InitScribble() *database.ScribleImpl {
 	return nil
 }
 
+func InitScheduler(a *database.MysqlImpl, b *database.PostgresImpl, c *database.ScribleImpl) *scheduler.SchedulerImpl {
+	wire.Build(
+		newsRepo,
+		jwtAuth,
+		newsSvc,
+		schedulerHandler,
+		schedulerTask,
+		scheduler.NewScheduler,
+	)
+
+	return nil
+}
+
+func InitPubsub(a *database.MysqlImpl, b *database.PostgresImpl, c *database.ScribleImpl) *rabbit.RabbitImpl {
+	wire.Build(
+		userRepo,
+		jwtAuth,
+		userSvc,
+		pubsubRabbitHandler,
+		pubsubConsumer,
+		rabbit.NewRabbit,
+	)
+
+	return nil
+}
+
 func InitServer(a *database.MysqlImpl, b *database.PostgresImpl, c *database.ScribleImpl) *http.HttpImpl {
 	wire.Build(
 		newsRepo,
@@ -116,19 +172,6 @@ func InitServer(a *database.MysqlImpl, b *database.PostgresImpl, c *database.Scr
 		restHandler,
 		httpRouter,
 		http.NewHttpProtocol,
-	)
-
-	return nil
-}
-
-func InitScheduler(a *database.MysqlImpl, b *database.PostgresImpl, c *database.ScribleImpl) *scheduler.SchedulerImpl {
-	wire.Build(
-		newsRepo,
-		jwtAuth,
-		newsSvc,
-		schedulerHandler,
-		schedulerTask,
-		scheduler.NewScheduler,
 	)
 
 	return nil
